@@ -8,18 +8,14 @@ import pyaudio
 import time
 
 def main():
-    text = "おはよう"
-
+    # 天気予報の取得
+    office_name = "長野県"
     weather = WeatherForecast()
-    for area_code in weather.get_weather_forecast_area_code().values():
-        text = weather.get_weather_forecast(area_code)
+    area_code = weather.get_weather_forecast_area_code()[office_name]
+    text = weather.get_weather_forecast(area_code)
 
-        # sample_file = "sanso.wav"
-        # sounds = Sounds(sample_file)
-        # sounds.playwavfile()
-
-        voicevox = VoicevoxEngine()
-        voicevox.speak(text=text)
+    voicevox = VoicevoxEngine()
+    voicevox.speak(text=text)
 
 class VoicevoxEngine:
     def __init__(self,host="127.0.0.1",port=50021):
@@ -78,39 +74,7 @@ class VoicevoxEngine:
     def speak_weather(self):
         pass
 
-# 中村さんそのボイスパックを購入したのでそれの試験。。。
-class Sounds:
-    def __init__(self, filename):
-        self.filename = filename
-
-    def playwavfile(self):
-        try:
-            wf = wave.open(self.filename, "r")
-        except Exception as e:
-            print(e)
-            return False
-            
-        # ストリームを開く
-        try:
-            p = pyaudio.PyAudio()
-            stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
-                            channels=wf.getnchannels(),
-                            rate=wf.getframerate(),
-                            output=True)
-
-            # 音声再生
-            chunk = 1024
-            data = wf.readframes(chunk)
-            while len(data) > 0:
-                stream.write(data)
-                data = wf.readframes(chunk)
-            stream.close()
-            p.terminate()
-            return 0
-
-        except Exception as e:
-            print(e)
-
+# 気象庁APIを使用して天気予報の取得。気温が取得できないのが難点。
 class WeatherForecast:
     def __init__(self):
         pass
@@ -151,13 +115,13 @@ class WeatherForecast:
         jma_area = jma_json[0]["timeSeries"][0]["areas"][0]["area"]["name"]
         jma_weather = jma_json[0]["timeSeries"][0]["areas"][0]["weathers"][0]
         jma_wind = jma_json[0]["timeSeries"][0]["areas"][0]["winds"][0]
+        jma_publishingOffice = jma_json[0]["publishingOffice"]
         
         # 全角スペース削除
         jma_weather = jma_weather.replace('　', '')
         jma_wind = jma_wind.replace('　', '')
 
         # 時刻フォーマット
-
         # strptime()関数を使用して、文字列をdatetimeオブジェクトに変換する
         date_format = "%Y-%m-%dT%H:%M:%S%z"
         date_format_str = "%Y年%m月%d日%H時"
@@ -165,17 +129,55 @@ class WeatherForecast:
         jma_date = datetime.strftime(jma_date, date_format_str)
 
         if message:
-            result = f"{jma_date}の{jma_area}の天気予報をお知らせします。\
-                天気は{jma_weather}です。風の状況は{jma_wind}です。"
+            result = f"\
+                {jma_date}の{jma_area}の天気予報をお知らせします。\
+                気象台は{jma_publishingOffice}です。\
+                天気は{jma_weather}です。\
+                風の状況は{jma_wind}です。"
+            
         else:
             result = {
                 "date": jma_date,
                 "areas": jma_area,
                 "weather": jma_weather,
                 "wind": jma_wind,
+                "publishingOffice": jma_publishingOffice
             }
 
         return result
+    
+# 中村さんそのボイスパックを購入したのでそれの試験。。。
+class Sounds:
+    def __init__(self, filename):
+        self.filename = filename
+
+    def playwavfile(self):
+        try:
+            wf = wave.open(self.filename, "r")
+        except Exception as e:
+            print(e)
+            return False
+            
+        # ストリームを開く
+        try:
+            p = pyaudio.PyAudio()
+            stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                            channels=wf.getnchannels(),
+                            rate=wf.getframerate(),
+                            output=True)
+
+            # 音声再生
+            chunk = 1024
+            data = wf.readframes(chunk)
+            while len(data) > 0:
+                stream.write(data)
+                data = wf.readframes(chunk)
+            stream.close()
+            p.terminate()
+            return 0
+
+        except Exception as e:
+            print(e)
 
 if __name__ == "__main__":
     main()
