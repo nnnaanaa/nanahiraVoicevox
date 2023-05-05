@@ -11,11 +11,11 @@ def main():
         "host": "localhost",
         "port": 50021
     }
-    text = "中村さんそは眠らない"
+    text = "おはよう"
     
     sample_file = "sanso.wav"
     sounds = Sounds(sample_file)
-    # sounds.playwavfile()
+    sounds.playwavfile()
 
     voicevox = Voicevox(requests_info["host"], requests_info["port"])
     voicevox.speak(text=text)
@@ -97,13 +97,11 @@ class Sounds:
             # 音声再生
             chunk = 1024
             data = wf.readframes(chunk)
-            while data != '':
+            while len(data) > 0:
                 stream.write(data)
                 data = wf.readframes(chunk)
             stream.close()
             p.terminate()
-
-            # プロンプトが帰ってきてない(error)
             return 0
 
         except Exception as e:
