@@ -1,28 +1,25 @@
+from requests.exceptions import Timeout
+from datetime import datetime
 import requests
 import json
 import io
 import wave
 import pyaudio
 import time
-from requests.exceptions import Timeout
 
 def main():
-    requests_info = {
-        "host": "localhost",
-        "port": 50021
-    }
     text = "おはよう"
 
     weather = WeatherForecast()
-    weather.get_weather_forecast_area_code()
-    # weather.get_weather_forecast()
+    for area_code in weather.get_weather_forecast_area_code().values():
+        text = weather.get_weather_forecast(area_code)
 
-    # sample_file = "sanso.wav"
-    # sounds = Sounds(sample_file)
-    # sounds.playwavfile()
+        # sample_file = "sanso.wav"
+        # sounds = Sounds(sample_file)
+        # sounds.playwavfile()
 
-    # voicevox = VoicevoxEngine(requests_info["host"], requests_info["port"])
-    # voicevox.speak(text=text)
+        voicevox = VoicevoxEngine()
+        voicevox.speak(text=text)
 
 class VoicevoxEngine:
     def __init__(self,host="127.0.0.1",port=50021):
@@ -78,7 +75,10 @@ class VoicevoxEngine:
             stream.close()
             p.terminate()
 
+    def speak_weather(self):
+        pass
 
+# 中村さんそのボイスパックを購入したのでそれの試験。。。
 class Sounds:
     def __init__(self, filename):
         self.filename = filename
@@ -131,19 +131,22 @@ class WeatherForecast:
             print(e)
             return False
 
-    def get_weather_forecast(self):
+    def get_weather_forecast(self, area_code="130000", message=True):
 
-        # 東京地方のエリアコード
+        # デフォルトでは東京地方のエリアコード
         # ![エリアコード](https://www.jma.go.jp/bosai/common/const/area.json)
-        area_code = "130000"
+
         jma_url = F"https://www.jma.go.jp/bosai/forecast/data/forecast/{area_code}.json"
 
-        # タイムアウト設定
-        jma_json = requests.get(jma_url).json()
+        try:
+            jma_json = requests.get(jma_url, timeout=3.0).json()
+        except Timeout:
+            return False
 
-        with open('./sample.json', 'w') as f:
-            json.dump(jma_json, f, sort_keys=True, indent=4, ensure_ascii=False)
+        except requests.exceptions.JSONDecodeError:
+            return False
 
+        # 各種情報取得
         jma_date = jma_json[0]["timeSeries"][0]["timeDefines"][0]
         jma_area = jma_json[0]["timeSeries"][0]["areas"][0]["area"]["name"]
         jma_weather = jma_json[0]["timeSeries"][0]["areas"][0]["weathers"][0]
@@ -153,10 +156,26 @@ class WeatherForecast:
         jma_weather = jma_weather.replace('　', '')
         jma_wind = jma_wind.replace('　', '')
 
-        print(jma_date)
-        print(jma_area)
-        print(jma_weather)
-        print(jma_wind)
+        # 時刻フォーマット
+
+        # strptime()関数を使用して、文字列をdatetimeオブジェクトに変換する
+        date_format = "%Y-%m-%dT%H:%M:%S%z"
+        date_format_str = "%Y年%m月%d日%H時"
+        jma_date = datetime.strptime(jma_date, date_format)
+        jma_date = datetime.strftime(jma_date, date_format_str)
+
+        if message:
+            result = f"{jma_date}の{jma_area}の天気予報をお知らせします。\
+                天気は{jma_weather}です。風の状況は{jma_wind}です。"
+        else:
+            result = {
+                "date": jma_date,
+                "areas": jma_area,
+                "weather": jma_weather,
+                "wind": jma_wind,
+            }
+
+        return result
 
 if __name__ == "__main__":
     main()
