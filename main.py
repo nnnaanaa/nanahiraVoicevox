@@ -10,13 +10,17 @@ import cv2
 
 def main():
     # 天気予報の取得
-    office_name = "長野県"
-    weather = WeatherForecast()
-    area_code = weather.get_weather_forecast_area_code()[office_name]
-    text = weather.get_weather_forecast(area_code)
+    # office_name = "長野県"
 
-    voicevox = VoicevoxEngine()
-    voicevox.speak(text=text)
+    weathermap = OpenWeatherMap()
+    weathermap.get_openweathermap_weaher()
+
+    # weather = WeatherForecast()
+    # area_code = weather.get_weather_forecast_area_code()[office_name]
+    # text = weather.get_weather_forecast(area_code)
+
+    # voicevox = VoicevoxEngine()
+    # voicevox.speak(text=text)
 
 class VoicevoxEngine:
     def __init__(self,host="127.0.0.1",port=50021):
@@ -147,6 +151,34 @@ class WeatherForecast:
 
         return result
     
+class OpenWeatherMap(WeatherForecast):
+    def __init__(self):        
+        """
+        {
+            "id": 1850147,
+            "name": "Tokyo",
+            "state": "",
+            "country": "JP",
+            "coord": {
+                "lon": 139.691711,
+                "lat": 35.689499
+            }
+        },
+        """
+        self.api_key = '68780da4d72e0b2806fd0373abd4cd91'
+
+    # 現在天気を取得
+    def get_openweathermap_weaher(self, id="1850147"):
+        url = F"http://api.openweathermap.org/data/2.5/weather?units=metric&id={id}&APPID={self.api_key}"
+        result_json = requests.get(url, timeout=3.0).json()
+        # print(result_json)
+        json_dump(result_json)
+
+    # 天気予報を取得
+    def get_openweathermap_forecast(self, id="1850147"):
+        url = F"http://api.openweathermap.org/data/2.5/forecast?units=metric&id={id}&APPID={self.api_key}"
+        result_json = requests.get(url, timeout=3.0).json()
+    
 # 中村さんそのボイスパックを購入したのでそれの試験。。。
 class Sounds:
     def __init__(self, filename):
@@ -180,6 +212,7 @@ class Sounds:
         except Exception as e:
             print(e)
 
+# 非同期実行にしないと後続処理が実行できない。。
 class MotionDetection:
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
@@ -243,6 +276,14 @@ class MotionDetection:
         # キャプチャをリリースして、ウィンドウをすべて閉じる
         self.cap.release()
         cv2.destroyAllWindows()
+
+# テスト用にJson取得結果をファイルに出力する。
+def json_dump(jsondata, filename="./test.json"):
+    try:
+        with open(filename, 'w') as fp:
+            json.dump(jsondata, fp, indent=4, ensure_ascii=False)
+    except Exception as e:
+        print(e)
 
 if __name__ == "__main__":
     main()
