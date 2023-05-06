@@ -10,17 +10,14 @@ import cv2
 
 def main():
     # 天気予報の取得
-    # office_name = "長野県"
+    office_name = "東京都"
 
     weathermap = OpenWeatherMap()
-    weathermap.get_openweathermap_weaher()
+    area_code = weathermap.get_weather_forecast_area_code()[office_name]
+    text = weathermap.get_weather_forecast(area_code)
 
-    # weather = WeatherForecast()
-    # area_code = weather.get_weather_forecast_area_code()[office_name]
-    # text = weather.get_weather_forecast(area_code)
-
-    # voicevox = VoicevoxEngine()
-    # voicevox.speak(text=text)
+    voicevox = VoicevoxEngine()
+    voicevox.speak(text=text)
 
 class VoicevoxEngine:
     def __init__(self,host="127.0.0.1",port=50021):
@@ -100,12 +97,12 @@ class WeatherForecast:
             print(e)
             return False
 
-    def get_weather_forecast(self, area_code="130000", message=True):
+    def get_weather_forecast(self, area_code="130000"):
 
         # デフォルトでは東京地方のエリアコード
         # ![エリアコード](https://www.jma.go.jp/bosai/common/const/area.json)
 
-        jma_url = F"https://www.jma.go.jp/bosai/forecast/data/forecast/{area_code}.json"
+        jma_url = f"https://www.jma.go.jp/bosai/forecast/data/forecast/{area_code}.json"
 
         try:
             jma_json = requests.get(jma_url, timeout=3.0).json()
@@ -133,51 +130,62 @@ class WeatherForecast:
         jma_date = datetime.strptime(jma_date, date_format)
         jma_date = datetime.strftime(jma_date, date_format_str)
 
-        if message:
-            result = f"\
-                {jma_date}の{jma_area}の天気予報をお知らせします。\
-                気象台は{jma_publishingOffice}です。\
-                天気は{jma_weather}です。\
-                風の状況は{jma_wind}です。"
-            
-        else:
-            result = {
-                "date": jma_date,
-                "areas": jma_area,
-                "weather": jma_weather,
-                "wind": jma_wind,
-                "publishingOffice": jma_publishingOffice
-            }
-
+        # メッセージの作成
+        result = self.create_message(jma_date, jma_area, jma_publishingOffice, jma_weather, jma_wind)
+        return result
+    
+    def create_message(self, jma_date: str, jma_area: str, jma_publishingOffice: str, jma_weather: str, jma_wind: str) -> str:
+        result = f"\
+            {jma_date}の{jma_area}の天気予報をお知らせします。\
+            気象台は{jma_publishingOffice}です。\
+            天気は{jma_weather}です。\
+            風の状況は{jma_wind}です。"
+        
         return result
     
 class OpenWeatherMap(WeatherForecast):
     def __init__(self):        
-        """
-        {
-            "id": 1850147,
-            "name": "Tokyo",
-            "state": "",
-            "country": "JP",
-            "coord": {
-                "lon": 139.691711,
-                "lat": 35.689499
-            }
-        },
-        """
         self.api_key = '68780da4d72e0b2806fd0373abd4cd91'
 
     # 現在天気を取得
     def get_openweathermap_weaher(self, id="1850147"):
-        url = F"http://api.openweathermap.org/data/2.5/weather?units=metric&id={id}&APPID={self.api_key}"
+        url = f"http://api.openweathermap.org/data/2.5/weather?units=metric&id={id}&APPID={self.api_key}"
         result_json = requests.get(url, timeout=3.0).json()
         # print(result_json)
-        json_dump(result_json)
+        temp = result_json["main"]["temp"]
+        temp_max = result_json["main"]["temp_max"]
+        temp_min = result_json["main"]["temp_min"]
+
+        # 固定値
+        p = "東京都"
+
+        result = {
+            "area": p,
+            "temp": temp,
+            "temp_max": temp_max,
+            "temp_min": temp_min,
+        }
+        return result
 
     # 天気予報を取得
     def get_openweathermap_forecast(self, id="1850147"):
-        url = F"http://api.openweathermap.org/data/2.5/forecast?units=metric&id={id}&APPID={self.api_key}"
+        url = f"http://api.openweathermap.org/data/2.5/forecast?units=metric&id={id}&APPID={self.api_key}"
         result_json = requests.get(url, timeout=3.0).json()
+
+    def create_message(self, jma_date: str, jma_area: str, jma_publishingOffice: str, jma_weather: str, jma_wind: str) -> str:
+        result = f"\
+            {jma_date}の{jma_area}の天気予報をお知らせします。\
+            気象台は{jma_publishingOffice}です。\
+            天気は{jma_weather}です。\
+            風の状況は{jma_wind}です。"
+        
+        # 現在の気温の取得
+        temp_info = self.get_openweathermap_weaher()
+        result += f"現在の{temp_info['area']}の気温は{temp_info['temp']}度です。\
+            最高気温は{temp_info['temp_max']}度です。\
+            最低気温は{temp_info['temp_min']}度です。"
+        
+        return result
     
 # 中村さんそのボイスパックを購入したのでそれの試験。。。
 class Sounds:
@@ -212,7 +220,7 @@ class Sounds:
         except Exception as e:
             print(e)
 
-# 非同期実行にしないと後続処理が実行できない。。
+# 非同期実行にしないと後続処理が実行できない。
 class MotionDetection:
     def __init__(self):
         self.cap = cv2.VideoCapture(0)
