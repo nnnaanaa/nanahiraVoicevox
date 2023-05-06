@@ -145,7 +145,7 @@ class WeatherForecast:
     
 class OpenWeatherMap(WeatherForecast):
     def __init__(self):        
-        self.api_key = '68780da4d72e0b2806fd0373abd4cd91'
+        self.api_key = "API_KEY"
 
     # 現在天気を取得
     def get_openweathermap_weaher(self, id="1850147"):
