@@ -113,10 +113,13 @@ class WeatherForecast:
             return False
 
         # 各種情報取得
-        jma_date = jma_json[0]["timeSeries"][0]["timeDefines"][0]
+        # 当日=0 明日=1 明後日=2
+        json_loc = 1
+
+        jma_date = jma_json[0]["timeSeries"][0]["timeDefines"][json_loc]
         jma_area = jma_json[0]["timeSeries"][0]["areas"][0]["area"]["name"]
-        jma_weather = jma_json[0]["timeSeries"][0]["areas"][0]["weathers"][0]
-        jma_wind = jma_json[0]["timeSeries"][0]["areas"][0]["winds"][0]
+        jma_weather = jma_json[0]["timeSeries"][0]["areas"][0]["weathers"][json_loc]
+        jma_wind = jma_json[0]["timeSeries"][0]["areas"][0]["winds"][json_loc]
         jma_publishingOffice = jma_json[0]["publishingOffice"]
         
         # 全角スペース削除
@@ -145,7 +148,7 @@ class WeatherForecast:
     
 class OpenWeatherMap(WeatherForecast):
     def __init__(self):        
-        self.api_key = "API_KEY"
+        self.api_key = "api_key"
 
     # 現在天気を取得
     def get_openweathermap_weaher(self, id="1850147"):
