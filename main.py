@@ -7,6 +7,7 @@ import wave
 import pyaudio
 import time
 import cv2
+import os
 
 def main():
     # 天気予報の取得
@@ -147,8 +148,10 @@ class WeatherForecast:
         return result
     
 class OpenWeatherMap(WeatherForecast):
-    def __init__(self):        
-        self.api_key = "api_key"
+    def __init__(self):
+        # 環境変数からAPIkeyを取得
+        self.api_key = os.environ.get("OPEN_WEATHER_API_KEY")
+        print(self.api_key)
 
     # 現在天気を取得
     def get_openweathermap_weaher(self, id="1850147"):
