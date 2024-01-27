@@ -1,4 +1,2 @@
-# voicevox_spk_nanahira
-[春歌ナナ](https://nanahira.jp/haruka_nana/)をpythonで喋らせる。  
-事前に[VOICEVOX ENGINE](https://github.com/VOICEVOX/voicevox_engine)をローカルで立ち上げて置く必要があり  
-※VOICEVOX ENGINEに対してリクエストを送信し、テキスト音声合成を行っているらしい  
+# speaks_nanahira
+https://github.com/VOICEVOX/voicevox_engine
