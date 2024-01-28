@@ -1,4 +1,4 @@
-from engineNanahira import VoicevoxEngine
+from nanahira import VoicevoxEngine
 
 def main():
     voicevox = VoicevoxEngine()
