@@ -1,19 +1,11 @@
-version: '2'
+version: '3'
 services:
   voicevox_engine:
-    # https://hub.docker.com/r/voicevox/voicevox_engine
-    # CPUの場合
     image: voicevox/voicevox_engine:cpu-ubuntu20.04-latest
-    # GPUの場合
-    # image: voicevox/voicevox_engine:nvidia-ubuntu20.04-latest
+    container_name: voicevox-engine
     ports:
       - '50021:50021'
+    expose:
+      - '8080'
     tty: true
-    # GPUを使用する場合は下記を追加
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
+    stdin_open: true
