@@ -4,7 +4,7 @@ from voicevox_client_local import VoicevoxEngineLocal
 def main():
     print("Starting")
     # voicevox = VoicevoxEngine()
-    voicevox = VoicevoxEngine()
+    voicevox = VoicevoxEngineLocal()
     voicevox.http_request(text="こんにちは")
 
 if __name__ == "__main__":

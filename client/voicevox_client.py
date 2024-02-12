@@ -6,7 +6,7 @@ import pyaudio
 import time
 
 class VoicevoxEngine:
-    def __init__(self, host="voicevox_network", port=50021):
+    def __init__(self, host="voicevox_engine", port=50021):
         self.host = host
         self.port = port
 

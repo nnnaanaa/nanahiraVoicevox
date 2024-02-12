@@ -3,22 +3,22 @@ services:
   voicevox_engine:
     image: voicevox/voicevox_engine:cpu-ubuntu20.04-latest
     container_name: voicevox_engine
-    # ports:
-    #   - '50021:50021'
-    expose:
-      - '50021'
+    ports:
+      - '50021:50021'
+    # expose:
+    #   - '50021'
     tty: true
     stdin_open: true
-    networks:
-      - voicevox_network
+    # networks:
+    #   - voicevox_network
 
-  voicevox_client:
-    build: ./client
-    container_name: voicevox_client
-    networks:
-      - voicevox_network
-    depends_on:
-      - voicevox_engine
+  # voicevox_client:
+  #   build: ./client
+  #   container_name: voicevox_client
+  #   networks:
+  #     - voicevox_network
+  #   depends_on:
+  #     - voicevox_engine
 
-networks:
-  voicevox_network:
+# networks:
+#   voicevox_network:
