@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from voicevox_client_local import VoicevoxEngineLocal
 
 def main():
