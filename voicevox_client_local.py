@@ -5,8 +5,8 @@ import wave
 import pyaudio
 import time
 
-class VoicevoxEngine:
-    def __init__(self, host="127.0.0.1", port=50021):
+class VoicevoxEngineLocal:
+    def __init__(self, host="localhost", port=50021):
         self.host = host
         self.port = port
 
