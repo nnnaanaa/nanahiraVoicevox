@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import requests
 import json
 import io
@@ -6,7 +8,7 @@ import pyaudio
 import time
 
 class VoicevoxEngineLocal:
-    def __init__(self, host="localhost", port=50021):
+    def __init__(self, host="127.0.0.1", port=50021):
         self.host = host
         self.port = port
 
