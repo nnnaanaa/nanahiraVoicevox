@@ -5,7 +5,7 @@ def run_docker_compose():
     try:
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         # docker-compose up -dコマンドを実行
-        result = subprocess.run(['docker-compose', 'up', '-d'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        result = subprocess.run(['docker', 'compose', 'up', '-d'], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # 結果の標準出力と標準エラーを取得
         stdout = result.stdout.decode('utf-8')
         stderr = result.stderr.decode('utf-8')
