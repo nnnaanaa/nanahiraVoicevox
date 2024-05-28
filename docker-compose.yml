@@ -5,6 +5,15 @@ services:
     container_name: voicevox_engine
     ports:
       - '50021:50021'
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2048m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10k
     expose:
       - '50021'
     tty: true
